@@ -2,21 +2,6 @@
 
 A modern, full-stack web application that extracts contact information (emails, phones, social links) from any public website and performs scam risk analysis. Built for Netlify deployment with serverless functions.
 
-## 🚀 Deploy to Netlify
-
-### Option 1: GitHub Import (Recommended)
-1. Push this code to a GitHub repository
-2. Go to [Netlify](https://app.netlify.com) → "Add new site" → "Import an existing project"
-3. Select your GitHub repo
-4. Build settings are auto-configured via `netlify.toml`
-5. Click **Deploy site**
-
-### Option 2: Netlify CLI
-```bash
-npm install -g netlify-cli
-netlify login
-netlify deploy --prod
-```
 
 ## 🛠️ Local Development
 
