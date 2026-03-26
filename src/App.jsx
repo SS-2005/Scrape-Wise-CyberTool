@@ -1,0 +1,755 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import './App.css';
+
+// ─── Icons (inline SVG components) ─────────────────────────────────────────
+const Icon = ({ name, size = 16, ...props }) => {
+  const icons = {
+    search: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    ),
+    mail: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+      </svg>
+    ),
+    phone: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/>
+      </svg>
+    ),
+    linkedin: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/>
+      </svg>
+    ),
+    twitter: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    ),
+    facebook: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+      </svg>
+    ),
+    instagram: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+      </svg>
+    ),
+    youtube: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="#0d1117" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+      </svg>
+    ),
+    github: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.2c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>
+      </svg>
+    ),
+    shield: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    ),
+    download: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+      </svg>
+    ),
+    globe: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    ),
+    alertTriangle: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+      </svg>
+    ),
+    checkCircle: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    ),
+    xCircle: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+      </svg>
+    ),
+    copy: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+      </svg>
+    ),
+    externalLink: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+      </svg>
+    ),
+    info: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+      </svg>
+    ),
+    zap: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    ),
+  };
+  return icons[name] || null;
+};
+
+// ─── Particle Background ─────────────────────────────────────────────────────
+const ParticleField = () => {
+  const particles = Array.from({ length: 30 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 2 + 0.5,
+    duration: Math.random() * 8 + 4,
+    delay: Math.random() * 4,
+    opacity: Math.random() * 0.4 + 0.1,
+  }));
+
+  return (
+    <div className="particle-field" aria-hidden="true">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="particle"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            opacity: p.opacity,
+            animationDuration: `${p.duration}s`,
+            animationDelay: `${p.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// ─── Loader ───────────────────────────────────────────────────────────────────
+const ScanLoader = ({ url }) => {
+  const [step, setStep] = useState(0);
+  const steps = [
+    'Connecting to server...',
+    'Fetching page content...',
+    'Parsing HTML structure...',
+    'Extracting contact data...',
+    'Running scam analysis...',
+    'Calculating confidence scores...',
+    'Generating report...',
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStep((s) => Math.min(s + 1, steps.length - 1));
+    }, 900);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="scan-loader">
+      <div className="scan-loader-inner">
+        <div className="scan-orbit">
+          <div className="scan-dot" />
+        </div>
+        <div className="scan-content">
+          <div className="scan-url">
+            <Icon name="globe" size={14} />
+            <span>{url}</span>
+          </div>
+          <div className="scan-steps">
+            {steps.slice(0, step + 1).map((s, i) => (
+              <div
+                key={i}
+                className={`scan-step ${i === step ? 'active' : 'done'}`}
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {i < step ? (
+                  <Icon name="checkCircle" size={12} style={{ color: 'var(--green)' }} />
+                ) : (
+                  <div className="step-spinner" />
+                )}
+                <span>{s}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Confidence Bar ───────────────────────────────────────────────────────────
+const ConfidenceBar = ({ value }) => {
+  const color = value >= 75 ? 'var(--green)' : value >= 50 ? 'var(--yellow)' : 'var(--red)';
+  return (
+    <div className="confidence-bar">
+      <div
+        className="confidence-fill"
+        style={{ width: `${value}%`, background: color }}
+      />
+    </div>
+  );
+};
+
+// ─── Contact Card ─────────────────────────────────────────────────────────────
+const ContactCard = ({ contact, index }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(contact.value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const iconName = ['email', 'mail'].includes(contact.type) ? 'mail' : contact.type;
+  const typeColors = {
+    email: '#6366f1',
+    phone: '#10b981',
+    linkedin: '#0077b5',
+    twitter: '#1da1f2',
+    facebook: '#1877f2',
+    instagram: '#e1306c',
+    youtube: '#ff0000',
+    github: '#6e7681',
+  };
+
+  const color = typeColors[contact.type] || '#6366f1';
+  const isLink = contact.value.startsWith('http');
+  const confScore = contact.confidence;
+  const confLabel = confScore >= 75 ? 'High' : confScore >= 50 ? 'Medium' : 'Low';
+
+  return (
+    <div
+      className="contact-card"
+      style={{ animationDelay: `${index * 0.07}s` }}
+    >
+      <div className="contact-card-icon" style={{ background: color + '22', color }}>
+        <Icon name={iconName} size={18} />
+      </div>
+      <div className="contact-card-body">
+        <div className="contact-type">{contact.type.charAt(0).toUpperCase() + contact.type.slice(1)}</div>
+        <div className="contact-value">
+          {isLink ? (
+            <a href={contact.value} target="_blank" rel="noopener noreferrer">
+              {contact.value.length > 45 ? contact.value.slice(0, 45) + '…' : contact.value}
+            </a>
+          ) : (
+            <span>{contact.value}</span>
+          )}
+        </div>
+        <div className="contact-confidence">
+          <ConfidenceBar value={confScore} />
+          <span className="conf-label">{confScore}% — {confLabel}</span>
+        </div>
+      </div>
+      <div className="contact-card-actions">
+        <button className="icon-btn" onClick={handleCopy} title="Copy">
+          {copied ? <Icon name="checkCircle" size={14} style={{ color: 'var(--green)' }} /> : <Icon name="copy" size={14} />}
+        </button>
+        {isLink && (
+          <a className="icon-btn" href={contact.value} target="_blank" rel="noopener noreferrer" title="Open">
+            <Icon name="externalLink" size={14} />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── Scam Analysis Panel ──────────────────────────────────────────────────────
+const ScamPanel = ({ analysis }) => {
+  const { isScam, score, riskLevel, indicators, safe } = analysis;
+
+  const riskConfig = {
+    MINIMAL: { color: 'var(--green)', bg: 'var(--green-glow)', icon: 'checkCircle', label: 'Safe to browse' },
+    LOW:     { color: 'var(--green)', bg: 'var(--green-glow)', icon: 'checkCircle', label: 'Likely legitimate' },
+    MEDIUM:  { color: 'var(--yellow)', bg: 'var(--yellow-glow)', icon: 'alertTriangle', label: 'Exercise caution' },
+    HIGH:    { color: 'var(--red)', bg: 'var(--red-glow)', icon: 'xCircle', label: 'High risk — avoid' },
+  };
+
+  const cfg = riskConfig[riskLevel] || riskConfig.MINIMAL;
+
+  return (
+    <div className="scam-panel" style={{ '--risk-color': cfg.color, '--risk-bg': cfg.bg }}>
+      <div className="scam-header">
+        <div className="scam-icon-wrap">
+          <Icon name="shield" size={28} style={{ color: cfg.color }} />
+        </div>
+        <div className="scam-summary">
+          <div className="scam-verdict" style={{ color: cfg.color }}>
+            <Icon name={cfg.icon} size={18} />
+            <span>{isScam ? 'Potential Scam Detected' : 'No Scam Detected'}</span>
+          </div>
+          <div className="scam-sub">{cfg.label}</div>
+        </div>
+        <div className="scam-score-ring">
+          <svg viewBox="0 0 44 44" width="64" height="64">
+            <circle cx="22" cy="22" r="18" fill="none" stroke="var(--border)" strokeWidth="3" />
+            <circle
+              cx="22" cy="22" r="18"
+              fill="none"
+              stroke={cfg.color}
+              strokeWidth="3"
+              strokeDasharray={`${(score / 100) * 113} 113`}
+              strokeDashoffset="0"
+              transform="rotate(-90 22 22)"
+              style={{ transition: 'stroke-dasharray 1s ease' }}
+            />
+            <text x="22" y="27" textAnchor="middle" fill={cfg.color} fontSize="10" fontWeight="700" fontFamily="JetBrains Mono">
+              {score}
+            </text>
+          </svg>
+          <div className="score-label">Risk</div>
+        </div>
+      </div>
+
+      <div className="risk-badge" style={{ background: cfg.bg, color: cfg.color, borderColor: cfg.color + '44' }}>
+        Risk Level: <strong>{riskLevel}</strong>
+      </div>
+
+      <div className="scam-indicators">
+        <div className="indicators-title">
+          <Icon name="info" size={13} />
+          Analysis Indicators
+        </div>
+        {indicators.map((ind, i) => (
+          <div key={i} className="indicator-item" style={{ animationDelay: `${i * 0.1}s` }}>
+            <div className="indicator-dot" style={{ background: cfg.color }} />
+            <span>{ind}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Result Stats ─────────────────────────────────────────────────────────────
+const ResultStats = ({ contacts, scamAnalysis }) => {
+  const emailCount = contacts.filter((c) => c.type === 'email').length;
+  const phoneCount = contacts.filter((c) => c.type === 'phone').length;
+  const socialCount = contacts.filter(
+    (c) => !['email', 'phone'].includes(c.type)
+  ).length;
+
+  const stats = [
+    { label: 'Emails', value: emailCount, color: '#6366f1', icon: 'mail' },
+    { label: 'Phones', value: phoneCount, color: '#10b981', icon: 'phone' },
+    { label: 'Social', value: socialCount, color: '#f59e0b', icon: 'globe' },
+    { label: 'Risk Score', value: scamAnalysis.score, color: scamAnalysis.isScam ? '#ef4444' : '#10b981', icon: 'shield', suffix: '' },
+  ];
+
+  return (
+    <div className="result-stats">
+      {stats.map((stat, i) => (
+        <div key={i} className="stat-card" style={{ animationDelay: `${i * 0.1}s` }}>
+          <div className="stat-icon" style={{ color: stat.color }}>
+            <Icon name={stat.icon} size={20} />
+          </div>
+          <div className="stat-value" style={{ color: stat.color }}>
+            {stat.value}{stat.suffix ?? ''}
+          </div>
+          <div className="stat-label">{stat.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── CSV Download ─────────────────────────────────────────────────────────────
+function downloadCSV(data) {
+  const rows = [
+    ['Type', 'Value', 'Confidence (%)', 'Valid'],
+    ...data.contacts.map((c) => [
+      c.type,
+      c.value,
+      c.confidence,
+      'yes',
+    ]),
+    [],
+    ['Scam Analysis'],
+    ['Is Scam', data.scamAnalysis.isScam ? 'YES' : 'NO'],
+    ['Risk Level', data.scamAnalysis.riskLevel],
+    ['Risk Score', data.scamAnalysis.score],
+    ['Indicators', data.scamAnalysis.indicators.join('; ')],
+    [],
+    ['Scraped URL', data.url],
+    ['Scraped At', data.scrapedAt],
+  ];
+
+  const csv = rows
+    .map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    )
+    .join('\r\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const domain = (() => {
+    try { return new URL(data.url).hostname.replace('www.', ''); } catch { return 'data'; }
+  })();
+  a.download = `scrapewise_${domain}_${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
+function normalizeUrl(rawUrl) {
+  const value = (rawUrl || '').trim();
+  if (!value) return '';
+
+  const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+
+  try {
+    return new URL(withProtocol).href;
+  } catch {
+    return value;
+  }
+}
+
+export default function App() {
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [filterType, setFilterType] = useState('all');
+  const inputRef = useRef(null);
+  const resultsRef = useRef(null);
+
+  const handleScrape = useCallback(async () => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+
+    const normalizedUrl = normalizeUrl(trimmed);
+
+    try {
+      new URL(normalizedUrl);
+    } catch {
+      setError('Please enter a valid website URL.');
+      setResult(null);
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+    setError(null);
+
+    try {
+      const res = await fetch('/.netlify/functions/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: normalizedUrl }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Scraping failed. The site may be blocking automated access.');
+      }
+
+      setResult(data);
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleScrape();
+    }
+  };
+
+  const handleSearchBoxClick = (e) => {
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    inputRef.current?.focus();
+  };
+
+  const filteredContacts = result?.contacts?.filter((c) =>
+    filterType === 'all' ? true : c.type === filterType
+  ) ?? [];
+
+  const contactTypes = result
+    ? ['all', ...new Set(result.contacts.map((c) => c.type))]
+    : [];
+
+  return (
+    <div className="app">
+      <ParticleField />
+
+      {/* ── Grid lines ── */}
+      <div className="grid-overlay" aria-hidden="true" />
+
+      {/* ── Header ── */}
+      <header className="header">
+        <div className="header-inner">
+          <div className="logo">
+            <div className="logo-icon">
+              <Icon name="zap" size={20} />
+            </div>
+            <div>
+              <div className="logo-name">ScrapeWise</div>
+              <div className="logo-tagline">Ultimate Web Scraper</div>
+            </div>
+          </div>
+          <nav className="header-nav">
+            <a
+              href="https://ss2005-portfolio.netlify.app/projects/scrapewise"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="details-link"
+            >
+              <Icon name="externalLink" size={14} />
+              Details
+            </a>
+          </nav>
+        </div>
+      </header>
+
+      {/* ── Hero Section ── */}
+      <main>
+        <section className="hero">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Icon name="zap" size={12} />
+              <span>Powered by intelligent scraping</span>
+            </div>
+            <h1 className="hero-title">
+              Extract <span className="gradient-text">Contacts</span> &amp;{' '}
+              <span className="gradient-text-red">Detect Scams</span>
+            </h1>
+            <p className="hero-desc">
+              Paste any website URL to instantly extract emails, phone numbers,
+              social profiles — and get a real-time scam risk assessment.
+            </p>
+
+            {/* ── URL Input ── */}
+            <div className="search-container">
+              <form className={`search-box ${loading ? 'loading' : ''}`} onSubmit={(e) => { e.preventDefault(); handleScrape(); }} onClick={handleSearchBoxClick}>
+                <div className="search-icon">
+                  <Icon name="globe" size={20} />
+                </div>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  inputMode="url"
+                  placeholder="https://example.com — type any URL"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  disabled={loading}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  className="search-input"
+                />
+                {url && !loading && (
+                  <button
+                    className="clear-btn"
+                    onClick={() => { setUrl(''); inputRef.current?.focus(); }}
+                    aria-label="Clear"
+                  >
+                    ×
+                  </button>
+                )}
+                <button
+                  className="scrape-btn"
+                  onClick={handleScrape}
+                  disabled={!url.trim() || loading}
+                >
+                  {loading ? (
+                    <span className="btn-spinner" />
+                  ) : (
+                    <>
+                      <Icon name="search" size={16} />
+                      <span>Analyze</span>
+                    </>
+                  )}
+                </button>
+              </form>
+              <div className="search-hints">
+                <span>Quick fill:</span>
+                {['github.com', 'stripe.com', 'vercel.com', 'yoursite.com'].map((example) => (
+                  <button
+                    key={example}
+                    className="hint-chip"
+                    onClick={() => {
+                      setUrl('https://' + example);
+                      setTimeout(() => {
+                        inputRef.current?.focus();
+                        inputRef.current?.select();
+                      }, 10);
+                    }}
+                    disabled={loading}
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Loading ── */}
+        {loading && <ScanLoader url={url} />}
+
+        {/* ── Error ── */}
+        {error && !loading && (
+          <div className="error-panel animate-fade-in-up">
+            <Icon name="xCircle" size={20} style={{ color: 'var(--red)', flexShrink: 0 }} />
+            <div>
+              <div className="error-title">Scrape Failed</div>
+              <div className="error-msg">{error}</div>
+              <div className="error-tips">
+                <div>• Ensure the URL is correct and publicly accessible</div>
+                <div>• Some sites block automated access (Cloudflare, bot protection)</div>
+                <div>• Try adding https:// prefix if missing</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Results ── */}
+        {result && !loading && (
+          <div ref={resultsRef} className="results animate-fade-in-up">
+            {/* Site metadata */}
+            <div className="site-meta-banner">
+              <div className="site-meta-info">
+                <div className="site-favicon-wrap">
+                  <img
+                    src={result.metadata.favicon}
+                    alt=""
+                    width={24}
+                    height={24}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+                <div>
+                  <div className="site-title">{result.metadata.title || 'Untitled Page'}</div>
+                  <a href={result.url} target="_blank" rel="noopener noreferrer" className="site-url-link">
+                    <Icon name="globe" size={12} />
+                    {result.url}
+                  </a>
+                </div>
+              </div>
+              <div className="result-actions">
+                <button
+                  className="action-btn primary"
+                  onClick={() => downloadCSV(result)}
+                >
+                  <Icon name="download" size={15} />
+                  Export CSV
+                </button>
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <ResultStats contacts={result.contacts} scamAnalysis={result.scamAnalysis} />
+
+            {/* Two-column layout */}
+            <div className="results-grid">
+              {/* Left: Contacts */}
+              <div className="contacts-section">
+                <div className="section-header">
+                  <h2>Contact Information</h2>
+                  <span className="count-badge">{result.contacts.length}</span>
+                </div>
+
+                {/* Filter chips */}
+                {contactTypes.length > 2 && (
+                  <div className="filter-chips">
+                    {contactTypes.map((type) => (
+                      <button
+                        key={type}
+                        className={`filter-chip ${filterType === type ? 'active' : ''}`}
+                        onClick={() => setFilterType(type)}
+                      >
+                        {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
+                        <span className="chip-count">
+                          {type === 'all'
+                            ? result.contacts.length
+                            : result.contacts.filter((c) => c.type === type).length}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {filteredContacts.length > 0 ? (
+                  <div className="contacts-list">
+                    {filteredContacts.map((contact, i) => (
+                      <ContactCard key={`${contact.type}-${i}`} contact={contact} index={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <Icon name="info" size={32} style={{ color: 'var(--text-muted)', marginBottom: 12 }} />
+                    <div>No {filterType === 'all' ? 'contact' : filterType} information found</div>
+                    <div className="empty-sub">The website may not publicly expose this data</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Scam Analysis */}
+              <div className="scam-section">
+                <div className="section-header">
+                  <h2>Scam Analysis</h2>
+                </div>
+                <ScamPanel analysis={result.scamAnalysis} />
+
+                {/* Site description */}
+                {result.metadata.description && (
+                  <div className="site-desc-card">
+                    <div className="site-desc-label">
+                      <Icon name="info" size={13} />
+                      Site Description
+                    </div>
+                    <p>{result.metadata.description}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="footer">
+        <div className="footer-inner">
+          <span>Built by Sahil Shaikh</span>
+          <span className="footer-dot">·</span>
+          <a
+            href="https://ss2005-portfolio.netlify.app/projects/scrapewise"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Project Details <Icon name="externalLink" size={11} style={{ display: 'inline', verticalAlign: 'middle' }} />
+          </a>
+          <span className="footer-dot">·</span>
+          <span>ScrapeWise v2.0</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
